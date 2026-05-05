@@ -410,6 +410,9 @@ DATETIME_INPUT_FORMATS = [
     "%Y-%m-%d %H:%M:%S",  # '2006-10-25 14:30:59'
     "%Y-%m-%d %H:%M:%S.%f",  # '2006-10-25 14:30:59.000200'
     "%Y-%m-%d %H:%M",  # '2006-10-25 14:30'
+    "%Y-%m-%dT%H:%M:%S",  # '2006-10-25T14:30:59'
+    "%Y-%m-%dT%H:%M:%S.%f",  # '2006-10-25T14:30:59.000200'
+    "%Y-%m-%dT%H:%M",  # '2006-10-25T14:30'
     "%m/%d/%Y %H:%M:%S",  # '10/25/2006 14:30:59'
     "%m/%d/%Y %H:%M:%S.%f",  # '10/25/2006 14:30:59.000200'
     "%m/%d/%Y %H:%M",  # '10/25/2006 14:30'
@@ -417,6 +420,11 @@ DATETIME_INPUT_FORMATS = [
     "%m/%d/%y %H:%M:%S.%f",  # '10/25/06 14:30:59.000200'
     "%m/%d/%y %H:%M",  # '10/25/06 14:30'
 ]
+
+# Whether to use HTML5 date/time input types (date, time, datetime-local)
+# instead of plain text inputs for DateInput, TimeInput, and DateTimeInput
+# widgets. When True, these widgets render native browser date/time pickers.
+USE_HTML5_DATE_INPUT = False
 
 # First day of week, to be used on calendars
 # 0 means Sunday, 1 means Monday...

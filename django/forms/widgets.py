@@ -9,6 +9,7 @@ from collections import defaultdict
 from graphlib import CycleError, TopologicalSorter
 from itertools import chain
 
+from django.conf import settings
 from django.forms.utils import flatatt, to_current_timezone
 from django.templatetags.static import static
 from django.utils import formats
@@ -613,12 +614,30 @@ class Textarea(Widget):
 class DateTimeBaseInput(TextInput):
     format_key = ""
     supports_microseconds = False
+    html5_input_type = None
+    html5_format = None
 
     def __init__(self, attrs=None, format=None):
+        explicit_type = attrs is not None and "type" in attrs
         super().__init__(attrs)
         self.format = format or None
+        if (
+            not explicit_type
+            and self.html5_input_type
+            and settings.USE_HTML5_DATE_INPUT
+        ):
+            self.input_type = self.html5_input_type
+            if self.html5_input_type in ("time", "datetime-local"):
+                # Preserve seconds in the browser UI.
+                self.attrs.setdefault("step", "1")
 
     def format_value(self, value):
+        if (
+            not self.format
+            and self.input_type == self.html5_input_type
+            and self.html5_format
+        ):
+            return formats.localize_input(value, self.html5_format)
         return formats.localize_input(
             value, self.format or formats.get_format(self.format_key)[0]
         )
@@ -627,16 +646,22 @@ class DateTimeBaseInput(TextInput):
 class DateInput(DateTimeBaseInput):
     format_key = "DATE_INPUT_FORMATS"
     template_name = "django/forms/widgets/date.html"
+    html5_input_type = "date"
+    html5_format = "%Y-%m-%d"
 
 
 class DateTimeInput(DateTimeBaseInput):
     format_key = "DATETIME_INPUT_FORMATS"
     template_name = "django/forms/widgets/datetime.html"
+    html5_input_type = "datetime-local"
+    html5_format = "%Y-%m-%dT%H:%M:%S"
 
 
 class TimeInput(DateTimeBaseInput):
     format_key = "TIME_INPUT_FORMATS"
     template_name = "django/forms/widgets/time.html"
+    html5_input_type = "time"
+    html5_format = "%H:%M:%S"
 
 
 # Defined at module level so that CheckboxInput is picklable (#17976)

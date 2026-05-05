@@ -258,6 +258,18 @@ Forms
   :setting:`USE_BLANK_CHOICE_DASH` allows you to revert back to the old
   default label.
 
+* The new :setting:`USE_HTML5_DATE_INPUT` setting allows opting in to native
+  HTML5 date/time input types. When enabled, :class:`~django.forms.DateInput`,
+  :class:`~django.forms.TimeInput`, and :class:`~django.forms.DateTimeInput`
+  render ``<input type="date">``, ``<input type="time">``, and
+  ``<input type="datetime-local">`` respectively, enabling native browser
+  date/time pickers. In the Django admin, this replaces the JavaScript-based
+  calendar and clock popups.
+
+* :setting:`DATETIME_INPUT_FORMATS` now includes ISO 8601 formats with ``T``
+  as the date/time separator, supporting values submitted by
+  ``<input type="datetime-local">`` elements.
+
 * :class:`~django.forms.FilePathField` now provides a
   :meth:`~django.forms.FilePathField.set_choices` method to scan the
   directory at :attr:`~django.forms.FilePathField.path` and refresh the

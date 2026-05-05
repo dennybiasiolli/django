@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.forms import CharField, DateTimeInput, Form
+from django.test import override_settings
 from django.utils import translation
 
 from .base import WidgetTest
@@ -74,4 +75,77 @@ class DateTimeInputTest(WidgetTest):
             '<div><label for="id_field">Field:</label>'
             '<input id="id_field" name="field" required type="text"></div>',
             form.render(),
+        )
+
+    @override_settings(USE_HTML5_DATE_INPUT=True)
+    def test_html5_render_none(self):
+        widget = DateTimeInput()
+        self.check_html(
+            widget,
+            "date",
+            None,
+            html='<input type="datetime-local" name="date" step="1">',
+        )
+
+    @override_settings(USE_HTML5_DATE_INPUT=True)
+    def test_html5_render_value(self):
+        widget = DateTimeInput()
+        d = datetime(2007, 9, 17, 12, 51, 34, 482548)
+        self.check_html(
+            widget,
+            "date",
+            d,
+            html=(
+                '<input type="datetime-local" name="date" '
+                'step="1" value="2007-09-17T12:51:34">'
+            ),
+        )
+        self.check_html(
+            widget,
+            "date",
+            datetime(2007, 9, 17, 12, 51),
+            html=(
+                '<input type="datetime-local" name="date" '
+                'step="1" value="2007-09-17T12:51:00">'
+            ),
+        )
+
+    @override_settings(USE_HTML5_DATE_INPUT=True)
+    @translation.override("de-at")
+    def test_html5_ignores_l10n(self):
+        """HTML5 datetime-local inputs always use ISO format."""
+        widget = DateTimeInput()
+        self.check_html(
+            widget,
+            "date",
+            datetime(2007, 9, 17, 12, 51, 34),
+            html=(
+                '<input type="datetime-local" name="date" '
+                'step="1" value="2007-09-17T12:51:34">'
+            ),
+        )
+
+    @override_settings(USE_HTML5_DATE_INPUT=True)
+    def test_html5_explicit_type_override(self):
+        """Explicit attrs={'type': 'text'} overrides the HTML5 setting."""
+        widget = DateTimeInput(attrs={"type": "text"})
+        self.check_html(
+            widget,
+            "date",
+            datetime(2007, 9, 17, 12, 51, 34),
+            html='<input type="text" name="date" value="2007-09-17 12:51:34">',
+        )
+
+    @override_settings(USE_HTML5_DATE_INPUT=True)
+    def test_html5_explicit_format_respected(self):
+        """Explicit format is used even when HTML5 input type is active."""
+        widget = DateTimeInput(format="%d/%m/%Y %H:%M")
+        self.check_html(
+            widget,
+            "date",
+            datetime(2007, 9, 17, 12, 51, 34),
+            html=(
+                '<input type="datetime-local" name="date" '
+                'step="1" value="17/09/2007 12:51">'
+            ),
         )

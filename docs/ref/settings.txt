@@ -1175,6 +1175,9 @@ Default::
         "%Y-%m-%d %H:%M:%S",  # '2006-10-25 14:30:59'
         "%Y-%m-%d %H:%M:%S.%f",  # '2006-10-25 14:30:59.000200'
         "%Y-%m-%d %H:%M",  # '2006-10-25 14:30'
+        "%Y-%m-%dT%H:%M:%S",  # '2006-10-25T14:30:59'
+        "%Y-%m-%dT%H:%M:%S.%f",  # '2006-10-25T14:30:59.000200'
+        "%Y-%m-%dT%H:%M",  # '2006-10-25T14:30'
         "%m/%d/%Y %H:%M:%S",  # '10/25/2006 14:30:59'
         "%m/%d/%Y %H:%M:%S.%f",  # '10/25/2006 14:30:59.000200'
         "%m/%d/%Y %H:%M",  # '10/25/2006 14:30'
@@ -1189,6 +1192,10 @@ these format strings use Python's :ref:`datetime module syntax
 <strftime-strptime-behavior>`, not the format strings from the :tfilter:`date`
 template filter. Date-only formats are not included as datetime fields will
 automatically try :setting:`DATE_INPUT_FORMATS` in last resort.
+
+Formats with ``T`` as the date/time separator (ISO 8601) are included to
+support values submitted by ``<input type="datetime-local">`` elements when
+:setting:`USE_HTML5_DATE_INPUT` is enabled.
 
 The locale-dictated format has higher precedence and will be applied instead.
 
@@ -3082,6 +3089,48 @@ See also :setting:`LANGUAGE_CODE` and :setting:`USE_TZ`.
     The default :file:`settings.py` file created by :djadmin:`django-admin
     startproject <startproject>` includes ``USE_I18N = True`` for convenience.
 
+.. setting:: USE_HTML5_DATE_INPUT
+
+``USE_HTML5_DATE_INPUT``
+------------------------
+
+Default: ``False``
+
+A boolean that specifies whether :class:`~django.forms.DateInput`,
+:class:`~django.forms.TimeInput`, and :class:`~django.forms.DateTimeInput`
+widgets should render HTML5 date/time input types instead of plain text inputs.
+
+When set to ``True``:
+
+* :class:`~django.forms.DateInput` renders ``<input type="date">``
+* :class:`~django.forms.TimeInput` renders ``<input type="time">``
+* :class:`~django.forms.DateTimeInput` renders ``<input type="datetime-local">``
+
+This enables native date/time pickers in modern browsers, providing a better
+user experience especially on mobile devices. Values are always formatted in
+ISO 8601 format as required by the HTML specification (``YYYY-MM-DD`` for
+dates, ``HH:MM:SS`` for times, ``YYYY-MM-DDTHH:MM:SS`` for datetimes).
+
+For :class:`~django.forms.TimeInput` and :class:`~django.forms.DateTimeInput`,
+a ``step="1"`` attribute is automatically added so that browsers display and
+submit seconds. Without it, most browsers only show hours and minutes, silently
+discarding any seconds in the value.
+
+In the Django admin, enabling this setting replaces the JavaScript-based
+calendar and clock popups with the browser's native date/time pickers.
+
+When ``False`` (the default), widgets render ``<input type="text">`` with
+locale-aware formatting, preserving the existing behavior.
+
+.. note::
+
+    The ``type`` attribute can still be overridden on a per-widget basis by
+    passing ``attrs={"type": "text"}`` to the widget constructor, regardless
+    of this setting.
+
+See also :setting:`DATE_INPUT_FORMATS`, :setting:`TIME_INPUT_FORMATS`, and
+:setting:`DATETIME_INPUT_FORMATS`.
+
 .. setting:: USE_THOUSAND_SEPARATOR
 
 ``USE_THOUSAND_SEPARATOR``
@@ -3914,6 +3963,7 @@ Localization (``l10n``)
 * :setting:`THOUSAND_SEPARATOR`
 * :setting:`TIME_FORMAT`
 * :setting:`TIME_INPUT_FORMATS`
+* :setting:`USE_HTML5_DATE_INPUT`
 * :setting:`USE_THOUSAND_SEPARATOR`
 * :setting:`YEAR_MONTH_FORMAT`
 
